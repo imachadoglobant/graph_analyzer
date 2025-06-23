@@ -19,42 +19,63 @@ void main(final List<String> arguments) async {
     )
     ..addOption('from', abbr: 'f', help: 'Input directory for analyze')
     ..addFlag('help', abbr: 'h')
-    ..addOption('to', abbr: 't', help: 'Output file name', defaultsTo: './uml');
+    ..addOption('to', abbr: 't', help: 'Output file name', defaultsTo: './uml')
+    ..addMultiOption(
+      // New argument for excluded classes
+      'exclude',
+      abbr: 'e',
+      help: 'A list of class names to exclude from the UML diagram.',
+      valueHelp: 'ClassName1,ClassName2', // Help text for multiple values
+    );
 
   final argsResults = argsParser.parse(arguments);
   if (argsResults.wasParsed('verbose')) {
     logger.activateVerbose();
   }
   if (argsResults.wasParsed('help')) {
-    logger.regular(helper.helpText(), onlyVerbose: false);
+    // Pass parser for full help
+    logger.regular(helper.helpText(argsParser), onlyVerbose: false);
+
     return;
   }
-  final from = argsResults['from'] as String;
+  final from = argsResults['from'] as String?;
   final reportTo = argsResults['to'] as String;
+  // Get the list of excluded classes
+  final List<String> excludedClasses = argsResults['exclude'] as List<String>;
+  logger.regular('excludedClasses=$excludedClasses', onlyVerbose: true);
 
-  if (!argsResults.wasParsed('from')) {
-    logger.error('Argument from is empty');
+  if (from == null || from.isEmpty) {
+    // Enhanced check for 'from'
+    logger.error('Argument --from (or -f) is required and cannot be empty.');
+    logger.regular(helper.helpText(argsParser), onlyVerbose: false);
     return;
   }
 
-  final converter = Converter(argsResults['uml'] as String);
+  final converter = Converter(argsResults['uml'] as String, excludedClasses);
   final reporter = Reporter.file(reportTo, converter);
-  final analyzer = CodeUml(reporter: reporter, logger: logger);
+  final analyzer = CodeUml(
+    reporter: reporter,
+    logger: logger,
+    excludedClasses: excludedClasses,
+  );
 
+  // Split 'from' by comma if multiple directories are supported by your analyze method
   analyzer.analyze(from.split(','));
 }
 
 class _Helper {
   const _Helper();
 
-  String helpText() {
-    return '''This package will help you create code for UML, and then use it to build a diagram.
+  // Modified helpText to include the ArgParser for more dynamic help
+  String helpText(ArgParser parser) {
+    return '''
+This package will help you create code for UML, and then use it to build a diagram.
+
 📘Usage:
-Output to console: code_uml <...directory_for_analysis> [--console]
-Output to file: code_uml <...directory_for_analysis> <output_result_file>\n
-Global options: 
---to=console \t-\toutput to console
---uml=plantuml \t-\tselect uml tool. One of [mermaid, plantuml]
---verbose \t-\tmore logs''';
+  code_uml --from <directory_for_analysis> [options]
+
+Global options:
+${parser.usage} 
+'''; // Using parser.usage automatically lists all options
   }
 }

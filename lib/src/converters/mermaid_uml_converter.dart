@@ -1,7 +1,9 @@
 part of 'converter.dart';
 
 final class MermaidUmlConverter implements Converter {
-  MermaidUmlConverter();
+  final List<String> excludedClasses;
+
+  MermaidUmlConverter(this.excludedClasses);
 
   @override
   String convertToText(final List<ClassDef> defs) {
@@ -34,7 +36,7 @@ final class MermaidUmlConverter implements Converter {
 
   @override
   String convertExtends(final ClassDef classDef) {
-    if (classDef.extendsOf != null) {
+    if (classDef.extendsOf != null && !excludedClasses.contains(classDef)) {
       return '${classDef.extendsOf} <|-- ${classDef.name}\n';
     }
     return '';

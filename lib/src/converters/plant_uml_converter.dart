@@ -1,7 +1,9 @@
 part of 'converter.dart';
 
 final class PlantUmlConverter implements Converter {
-  PlantUmlConverter();
+  final List<String> excludedClasses;
+
+  PlantUmlConverter(this.excludedClasses);
 
   @override
   String convertToText(final List<ClassDef> defs) {
@@ -70,7 +72,8 @@ final class PlantUmlConverter implements Converter {
 
   @override
   String convertExtends(final ClassDef classDef) {
-    if (classDef.extendsOf != null) {
+    if (classDef.extendsOf != null &&
+        !excludedClasses.contains(classDef.extendsOf)) {
       return '${classDef.extendsOf} <|-- ${classDef.name}\n';
     }
     return '';

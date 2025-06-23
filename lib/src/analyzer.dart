@@ -16,8 +16,13 @@ import 'reporter.dart';
 class CodeUml {
   final Reporter reporter;
   final Logger logger;
+  final List<String> excludedClasses;
 
-  CodeUml({required this.reporter, required this.logger});
+  CodeUml({
+    required this.reporter,
+    required this.logger,
+    this.excludedClasses = const [], // Default to an empty list
+  });
 
   /// Retrieves files from the specified directories
   List<String> _getFilePathsFromDir(final List<String> dirsPath) {
@@ -57,6 +62,13 @@ class CodeUml {
 
         for (final unitMember in unit.unit.declarations) {
           if (unitMember is ClassDeclaration) {
+            final className = unitMember.name.lexeme;
+            logger.regular('className=$className', onlyVerbose: true);
+            // Check if the class is in the excluded list
+            if (excludedClasses.contains(className)) {
+              logger.info('Excluded class: $className', onlyVerbose: false);
+              continue; // Skip this class
+            }
             final analyzedClass = _analyzeClass(unitMember);
             classesDef.add(analyzedClass);
           }
@@ -87,7 +99,8 @@ class CodeUml {
         classDef.deps.addAll(_analyzeDeps(member));
       }
     }
-    logger.info('\t ${classDef.name}', onlyVerbose: true);
+    logger.info('- ${classDef.name} : ${classDef.extendsOf}',
+        onlyVerbose: true);
     return classDef;
   }
 
@@ -107,6 +120,7 @@ class CodeUml {
   Set<String> _analyzeDeps(final FieldDeclaration fieldDeclaration) {
     final result = <String>{};
     var type = fieldDeclaration.fields.type.toString();
+    // logger.regular('type=$type', onlyVerbose: true);
 
     if (type.endsWith('?')) {
       type = type.replaceAll('?', '');
