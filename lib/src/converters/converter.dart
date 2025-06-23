@@ -34,6 +34,12 @@ sealed class Converter {
   /// Converts end of [ClassDef] to uml code
   String convertEndClass(final ClassDef def);
 
+  /// Converts start of [ClassDef] to uml code
+  String convertStartEnum(final ClassDef def);
+
+  /// Convert class dependencies to uml code
+  String convertValues(final ClassDef def);
+
   /// Converts [FieldDef] to uml code
   String convertFields(final ClassDef def);
 

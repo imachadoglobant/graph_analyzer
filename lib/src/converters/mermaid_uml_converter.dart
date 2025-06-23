@@ -44,11 +44,14 @@ final class MermaidUmlConverter implements Converter {
   }
 
   @override
+  String convertValues(ClassDef def) => '';
+
+  @override
   String convertFields(final ClassDef def) {
     final result = StringBuffer();
     for (final field in def.fields) {
       result.write(
-        '${field.isPrivate ? privateAccessModifier : publicAccessModifier}${field.name}: ${field.type}\n',
+        '\t${field.isPrivate ? privateAccessModifier : publicAccessModifier}${field.name}: ${field.type}\n',
       );
     }
     return result.toString();
@@ -73,7 +76,7 @@ final class MermaidUmlConverter implements Converter {
         continue; // Skip this method
       }
       result.write(
-          '${method.isPrivate ? privateAccessModifier : publicAccessModifier}'
+          '\t${method.isPrivate ? privateAccessModifier : publicAccessModifier}'
           '${method.isGetter || method.isSetter ? '«' : ''}'
           '${method.isGetter ? 'get' : ''}'
           '${method.isGetter && method.isSetter ? '/' : ''}'
@@ -98,6 +101,12 @@ final class MermaidUmlConverter implements Converter {
       return '}\n';
     }
     return '\n';
+  }
+
+  @override
+  String convertStartEnum(final ClassDef def) {
+    final showBrace = def.methods.isNotEmpty;
+    return 'class ${def.name} ${showBrace ? '{' : ''}\n';
   }
 
   @override

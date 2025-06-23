@@ -15,6 +15,7 @@ import 'method_def.dart';
 ///
 /// [isAbstract] - whether the class is abstract
 class ClassDef {
+  final Set<String> values = {};
   final List<FieldDef> fields = [];
   final List<MethodDef> methods = [];
   final Set<String> deps = {};
@@ -23,4 +24,5 @@ class ClassDef {
   String name = '';
   String? extendsOf;
   bool isAbstract = false;
+  bool isEnum = false;
 }

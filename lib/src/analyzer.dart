@@ -72,6 +72,12 @@ class CodeUml {
             final analyzedClass = _analyzeClass(unitMember);
             classesDef.add(analyzedClass);
           }
+          if (unitMember is EnumDeclaration) {
+            final enumName = unitMember.name.lexeme;
+            logger.regular('enumName=$enumName', onlyVerbose: true);
+            final analyzedEnum = _analyzeEnum(unitMember);
+            classesDef.add(analyzedEnum);
+          }
         }
       }
     }
@@ -169,6 +175,20 @@ class CodeUml {
         'Completer?',
       ].contains(type) &&
       !type.contains(' ');
+
+  /// Analyzes a class for methods, fields, inheritance, implementations, and dependencies
+  ClassDef _analyzeEnum(final EnumDeclaration enumDeclaration) {
+    final classDef = ClassDef();
+    classDef.name = enumDeclaration.name.lexeme;
+    classDef.isEnum = true;
+    for (final member in enumDeclaration.constants) {
+      logger.info('-- value : ${member.name.lexeme}', onlyVerbose: true);
+      classDef.values.add(member.name.lexeme);
+    }
+    logger.info('- ${classDef.name} : ${classDef.extendsOf}',
+        onlyVerbose: true);
+    return classDef;
+  }
 
   bool _isExcludedFile(final Uri uri) {
     final filename = uri.pathSegments.last;

@@ -12,10 +12,14 @@ final class PlantUmlConverter implements Converter {
 
     for (final def in defs) {
       stringBuffer.write(def.isAbstract ? 'abstract ' : '');
-      stringBuffer.write(convertStartClass(def));
+      stringBuffer
+          .write(def.isEnum ? convertStartEnum(def) : convertStartClass(def));
+      stringBuffer.write(def.isEnum ? convertValues(def) : '');
       stringBuffer.write(convertFields(def));
-      stringBuffer.write(methodsDivider);
-      stringBuffer.write(convertMethods(def));
+      if (def.methods.isNotEmpty) {
+        stringBuffer.write(methodsDivider);
+        stringBuffer.write(convertMethods(def));
+      }
       stringBuffer.write(convertEndClass(def));
       stringBuffer.write(convertExtends(def));
       stringBuffer.write(convertDependencies(def));
@@ -40,7 +44,7 @@ final class PlantUmlConverter implements Converter {
         continue; // Skip this method
       }
       result.write(
-        '${method.isPrivate ? privateAccessModifier : publicAccessModifier}'
+        '\t${method.isPrivate ? privateAccessModifier : publicAccessModifier}'
         '${method.isGetter || method.isSetter ? '«' : ''}'
         '${method.isGetter ? 'get' : ''}'
         '${method.isGetter && method.isSetter ? '/' : ''}'
@@ -55,11 +59,22 @@ final class PlantUmlConverter implements Converter {
   }
 
   @override
+  String convertValues(final ClassDef def) {
+    final result = StringBuffer();
+    for (final field in def.values) {
+      result.write(
+        '\t$field\n',
+      );
+    }
+    return result.toString();
+  }
+
+  @override
   String convertFields(final ClassDef def) {
     final result = StringBuffer();
     for (final field in def.fields) {
       result.write(
-        '${field.isPrivate ? privateAccessModifier : publicAccessModifier}'
+        '\t${field.isPrivate ? privateAccessModifier : publicAccessModifier}'
         '${field.name}:'
         ' ${field.type}\n',
       );
@@ -72,6 +87,9 @@ final class PlantUmlConverter implements Converter {
 
   @override
   String convertEndClass(final ClassDef def) => '}\n';
+
+  @override
+  String convertStartEnum(final ClassDef def) => 'enum ${def.name} {\n';
 
   @override
   String get methodsDivider => '---\n';
@@ -89,6 +107,7 @@ final class PlantUmlConverter implements Converter {
   String convertDependencies(final ClassDef def) {
     final result = StringBuffer();
     for (final dep in def.deps) {
+      if (excludedClasses.contains(dep)) continue;
       result.write('${def.name} ..> $dep\n');
     }
     return result.toString();
