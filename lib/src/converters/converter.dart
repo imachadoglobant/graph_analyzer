@@ -5,14 +5,14 @@ part 'plant_uml_converter.dart';
 
 /// This class converts definitions to uml code
 sealed class Converter {
-  factory Converter(
-      final String converterType, final List<String> excludedClasses) {
+  factory Converter(final String converterType,
+      final List<String> excludedClasses, final List<String> excludedMethods) {
     switch (converterType) {
       case 'mermaid':
-        return MermaidUmlConverter(excludedClasses);
+        return MermaidUmlConverter(excludedClasses, excludedMethods);
       case 'plantuml':
       default:
-        return PlantUmlConverter(excludedClasses);
+        return PlantUmlConverter(excludedClasses, excludedMethods);
     }
   }
 

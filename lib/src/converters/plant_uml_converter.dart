@@ -2,8 +2,9 @@ part of 'converter.dart';
 
 final class PlantUmlConverter implements Converter {
   final List<String> excludedClasses;
+  final List<String> excludedMethods;
 
-  PlantUmlConverter(this.excludedClasses);
+  PlantUmlConverter(this.excludedClasses, this.excludedMethods);
 
   @override
   String convertToText(final List<ClassDef> defs) {
@@ -33,6 +34,11 @@ final class PlantUmlConverter implements Converter {
     final result = StringBuffer();
 
     for (final method in def.methods) {
+      if (excludedMethods.contains(method.name)) {
+        // Optionally log that a method is being skipped
+        // logger.info('Excluding method: ${classDef.name}.${method.name}');
+        continue; // Skip this method
+      }
       result.write(
         '${method.isPrivate ? privateAccessModifier : publicAccessModifier}'
         '${method.isGetter || method.isSetter ? '«' : ''}'

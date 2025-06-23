@@ -2,8 +2,9 @@ part of 'converter.dart';
 
 final class MermaidUmlConverter implements Converter {
   final List<String> excludedClasses;
+  final List<String> excludedMethods;
 
-  MermaidUmlConverter(this.excludedClasses);
+  MermaidUmlConverter(this.excludedClasses, this.excludedMethods);
 
   @override
   String convertToText(final List<ClassDef> defs) {
@@ -66,6 +67,11 @@ final class MermaidUmlConverter implements Converter {
   String convertMethods(final ClassDef def) {
     final result = StringBuffer();
     for (final method in def.methods) {
+      if (excludedMethods.contains(method.name)) {
+        // Optionally log that a method is being skipped
+        // logger.info('Excluding method: ${classDef.name}.${method.name}');
+        continue; // Skip this method
+      }
       result.write(
           '${method.isPrivate ? privateAccessModifier : publicAccessModifier}'
           '${method.isGetter || method.isSetter ? '«' : ''}'

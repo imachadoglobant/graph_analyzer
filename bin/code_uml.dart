@@ -26,6 +26,14 @@ void main(final List<String> arguments) async {
       abbr: 'e',
       help: 'A list of class names to exclude from the UML diagram.',
       valueHelp: 'ClassName1,ClassName2', // Help text for multiple values
+    )
+    ..addMultiOption(
+      // New argument for excluded methods
+      'exclude-methods',
+      abbr: 'm',
+      help:
+          'A list of method names to exclude from the UML diagram (e.g., toString,hashCode).',
+      valueHelp: 'methodName1,methodName2',
     );
 
   final argsResults = argsParser.parse(arguments);
@@ -43,6 +51,9 @@ void main(final List<String> arguments) async {
   // Get the list of excluded classes
   final List<String> excludedClasses = argsResults['exclude'] as List<String>;
   logger.regular('excludedClasses=$excludedClasses', onlyVerbose: true);
+  final List<String> excludedMethods =
+      argsResults['exclude-methods'] as List<String>;
+  logger.regular('excludedMethods=$excludedMethods', onlyVerbose: true);
 
   if (from == null || from.isEmpty) {
     // Enhanced check for 'from'
@@ -51,7 +62,8 @@ void main(final List<String> arguments) async {
     return;
   }
 
-  final converter = Converter(argsResults['uml'] as String, excludedClasses);
+  final converter =
+      Converter(argsResults['uml'] as String, excludedClasses, excludedMethods);
   final reporter = Reporter.file(reportTo, converter);
   final analyzer = CodeUml(
     reporter: reporter,
