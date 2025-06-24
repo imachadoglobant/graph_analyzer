@@ -10,6 +10,7 @@ sealed class Converter {
       {required final String converterType,
       required final List<String> excludedClasses,
       required final List<String> excludedMethods,
+      required final List<String> customHeaders,
       final String? theme,
       final String? title}) {
     switch (converterType) {
@@ -17,6 +18,7 @@ sealed class Converter {
         return MermaidUmlConverter(
             theme: theme,
             title: title,
+            customHeaders: customHeaders,
             excludedClasses: excludedClasses,
             excludedMethods: excludedMethods);
       case 'plantuml':
@@ -24,6 +26,7 @@ sealed class Converter {
         return PlantUmlConverter(
             theme: theme,
             title: title,
+            customHeaders: customHeaders,
             excludedClasses: excludedClasses,
             excludedMethods: excludedMethods);
     }

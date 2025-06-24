@@ -36,15 +36,20 @@ void main(final List<String> arguments) async {
       valueHelp: 'methodName1,methodName2',
     )
     ..addOption(
-      // New argument for PlantUML theme
       'theme',
       abbr: 'T',
       help:
           'Specifies the PlantUML theme to apply (e.g., cloudscape-design, cerulean). Only for PlantUML.',
       valueHelp: 'theme-name',
     )
+    ..addMultiOption(
+      'header',
+      abbr: 'H',
+      help:
+          'Adds custom header lines to the PlantUML diagram (e.g., skinparam commands). Occurs after theme, before title. Can be used multiple times.',
+      valueHelp: '"skinparam monochrome true"',
+    )
     ..addOption(
-      // New argument for diagram title
       'title',
       help: 'Sets the title for the generated diagram.',
       valueHelp: '"My Awesome Diagram"',
@@ -64,15 +69,23 @@ void main(final List<String> arguments) async {
   final reportTo = argsResults['to'] as String;
   // Get the list of excluded classes
   final List<String> excludedClasses = argsResults['exclude'] as List<String>;
-  logger.regular('excludedClasses=$excludedClasses', onlyVerbose: true);
   final List<String> excludedMethods =
       argsResults['exclude-methods'] as List<String>;
-  logger.regular('excludedMethods=$excludedMethods', onlyVerbose: true);
   final String? plantUmlTheme = argsResults['theme'] as String?;
+  final List<String> customHeaders = argsResults['header'] as List<String>;
+  final String? diagramTitle = argsResults['title'] as String?;
+
+  logger.regular('excludedClasses=$excludedClasses', onlyVerbose: true);
+  logger.regular('excludedMethods=$excludedMethods', onlyVerbose: true);
   if (plantUmlTheme != null) {
     logger.regular('plantUmlTheme=$plantUmlTheme', onlyVerbose: true);
   }
-  final String? diagramTitle = argsResults['title'] as String?;
+  if (customHeaders.isNotEmpty) {
+    logger.regular('Custom PlantUML Headers:', onlyVerbose: true);
+    for (final header in customHeaders) {
+      logger.regular('  $header', onlyVerbose: true);
+    }
+  }
   if (diagramTitle != null) {
     logger.regular('Diagram Title: "$diagramTitle"', onlyVerbose: true);
   }
@@ -88,6 +101,7 @@ void main(final List<String> arguments) async {
       converterType: argsResults['uml'] as String,
       theme: plantUmlTheme,
       title: diagramTitle,
+      customHeaders: customHeaders,
       excludedClasses: excludedClasses,
       excludedMethods: excludedMethods);
   final reporter = Reporter.file(reportTo, converter);

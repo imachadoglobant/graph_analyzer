@@ -3,12 +3,14 @@ part of 'converter.dart';
 final class PlantUmlConverter implements Converter {
   final String? theme;
   final String? title;
+  final List<String> customHeaders;
   final List<String> excludedClasses;
   final List<String> excludedMethods;
 
   PlantUmlConverter(
       {required this.excludedClasses,
       required this.excludedMethods,
+      required this.customHeaders,
       this.theme,
       this.title});
 
@@ -18,14 +20,21 @@ final class PlantUmlConverter implements Converter {
 
     // Apply the theme if provided
     if (theme != null && theme!.isNotEmpty) {
-      // Basic validation: ensure theme name doesn't contain unsafe characters
-      // You might want a more robust validation or allow list.
+      // Ensure theme name doesn't contain unsafe characters
       if (RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(theme!)) {
         stringBuffer.writeln('!theme $theme');
-        // Logger().info('Applied PlantUML theme: $theme'); // Optional logging
       } else {
         Logger().error(
             'Invalid theme name provided: $theme. Skipping theme application.');
+      }
+    }
+
+    for (final headerLine in customHeaders) {
+      // Ensure the line isn't empty and doesn't try to close the diagram prematurely.
+      final trimmedLine = headerLine.trim();
+      if (trimmedLine.isNotEmpty &&
+          !trimmedLine.toLowerCase().startsWith('@enduml')) {
+        stringBuffer.writeln(trimmedLine);
       }
     }
 

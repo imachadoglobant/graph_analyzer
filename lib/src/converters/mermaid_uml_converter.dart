@@ -3,12 +3,14 @@ part of 'converter.dart';
 final class MermaidUmlConverter implements Converter {
   final String? theme;
   final String? title;
+  final List<String> customHeaders;
   final List<String> excludedClasses;
   final List<String> excludedMethods;
 
   MermaidUmlConverter({
     required this.excludedClasses,
     required this.excludedMethods,
+    required this.customHeaders,
     this.theme,
     this.title,
   });
