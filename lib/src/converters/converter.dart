@@ -1,18 +1,28 @@
 import '../../code_uml.dart';
+import '../../utils.dart';
 
 part 'mermaid_uml_converter.dart';
 part 'plant_uml_converter.dart';
 
 /// This class converts definitions to uml code
 sealed class Converter {
-  factory Converter(final String converterType,
-      final List<String> excludedClasses, final List<String> excludedMethods) {
+  factory Converter(
+      {required final String converterType,
+      required final List<String> excludedClasses,
+      required final List<String> excludedMethods,
+      final String? theme}) {
     switch (converterType) {
       case 'mermaid':
-        return MermaidUmlConverter(excludedClasses, excludedMethods);
+        return MermaidUmlConverter(
+            theme: theme,
+            excludedClasses: excludedClasses,
+            excludedMethods: excludedMethods);
       case 'plantuml':
       default:
-        return PlantUmlConverter(excludedClasses, excludedMethods);
+        return PlantUmlConverter(
+            theme: theme,
+            excludedClasses: excludedClasses,
+            excludedMethods: excludedMethods);
     }
   }
 

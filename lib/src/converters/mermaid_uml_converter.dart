@@ -1,10 +1,15 @@
 part of 'converter.dart';
 
 final class MermaidUmlConverter implements Converter {
+  final String? theme;
   final List<String> excludedClasses;
   final List<String> excludedMethods;
 
-  MermaidUmlConverter(this.excludedClasses, this.excludedMethods);
+  MermaidUmlConverter({
+    required this.excludedClasses,
+    required this.excludedMethods,
+    this.theme,
+  });
 
   @override
   String convertToText(final List<ClassDef> defs) {

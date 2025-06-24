@@ -34,6 +34,13 @@ void main(final List<String> arguments) async {
       help:
           'A list of method names to exclude from the UML diagram (e.g., toString,hashCode).',
       valueHelp: 'methodName1,methodName2',
+    )
+    ..addOption(
+      // New argument for PlantUML theme
+      'theme',
+      help:
+          'Specifies the PlantUML theme to apply (e.g., cloudscape-design, cerulean). Only for PlantUML.',
+      valueHelp: 'theme-name',
     );
 
   final argsResults = argsParser.parse(arguments);
@@ -54,6 +61,10 @@ void main(final List<String> arguments) async {
   final List<String> excludedMethods =
       argsResults['exclude-methods'] as List<String>;
   logger.regular('excludedMethods=$excludedMethods', onlyVerbose: true);
+  final String? plantUmlTheme = argsResults['theme'] as String?;
+  if (plantUmlTheme != null) {
+    logger.regular('plantUmlTheme=$plantUmlTheme', onlyVerbose: true);
+  }
 
   if (from == null || from.isEmpty) {
     // Enhanced check for 'from'
@@ -62,8 +73,11 @@ void main(final List<String> arguments) async {
     return;
   }
 
-  final converter =
-      Converter(argsResults['uml'] as String, excludedClasses, excludedMethods);
+  final converter = Converter(
+      converterType: argsResults['uml'] as String,
+      theme: plantUmlTheme,
+      excludedClasses: excludedClasses,
+      excludedMethods: excludedMethods);
   final reporter = Reporter.file(reportTo, converter);
   final analyzer = CodeUml(
     reporter: reporter,

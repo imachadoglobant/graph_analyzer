@@ -1,16 +1,35 @@
 part of 'converter.dart';
 
 final class PlantUmlConverter implements Converter {
+  final String? theme;
   final List<String> excludedClasses;
   final List<String> excludedMethods;
 
-  PlantUmlConverter(this.excludedClasses, this.excludedMethods);
+  PlantUmlConverter({
+    required this.excludedClasses,
+    required this.excludedMethods,
+    this.theme,
+  });
 
   @override
   String convertToText(final List<ClassDef> defs) {
-    final stringBuffer = StringBuffer('@startuml\n');
+    final stringBuffer = StringBuffer('@startuml @\n');
+
+    // Apply the theme if provided
+    if (theme != null && theme!.isNotEmpty) {
+      // Basic validation: ensure theme name doesn't contain unsafe characters
+      // You might want a more robust validation or allow list.
+      if (RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(theme!)) {
+        stringBuffer.writeln('!theme $theme');
+        // Logger().info('Applied PlantUML theme: $theme'); // Optional logging
+      } else {
+        Logger().error(
+            'Invalid theme name provided: $theme. Skipping theme application.');
+      }
+    }
 
     for (final def in defs) {
+      stringBuffer.write('\n');
       stringBuffer.write(def.isAbstract ? 'abstract ' : '');
       stringBuffer
           .write(def.isEnum ? convertStartEnum(def) : convertStartClass(def));
@@ -83,7 +102,16 @@ final class PlantUmlConverter implements Converter {
   }
 
   @override
-  String convertStartClass(final ClassDef def) => 'class ${def.name} {\n';
+  String convertStartClass(final ClassDef def) {
+    if (def.extendsOf != null && !excludedClasses.contains(def.extendsOf)) {
+      return 'class ${def.name} <<${def.extendsOf}>> {\n';
+    }
+    if (def.implementsOf.isNotEmpty &&
+        !excludedClasses.contains(def.extendsOf)) {
+      return 'class ${def.name} <<${def.implementsOf.toList().toString()}>> {\n';
+    }
+    return 'class ${def.name} {\n';
+  }
 
   @override
   String convertEndClass(final ClassDef def) => '}\n';
