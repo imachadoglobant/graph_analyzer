@@ -2,20 +2,24 @@ import '../../code_uml.dart';
 import '../../utils.dart';
 
 part 'mermaid_uml_converter.dart';
+
 part 'plant_uml_converter.dart';
 
 /// This class converts definitions to uml code
 sealed class Converter {
-  factory Converter(
-      {required final String converterType,
-      required final List<String> excludedClasses,
-      required final List<String> excludedMethods,
-      required final List<String> customHeaders,
-      final String? theme,
-      final String? title}) {
+  factory Converter({
+    required final String converterType,
+    required final List<String> excludedClasses,
+    required final List<String> excludedMethods,
+    required final List<String> customHeaders,
+    required final String generationComment,
+    final String? theme,
+    final String? title,
+  }) {
     switch (converterType) {
       case 'mermaid':
         return MermaidUmlConverter(
+            generationComment: generationComment,
             theme: theme,
             title: title,
             customHeaders: customHeaders,
@@ -24,6 +28,7 @@ sealed class Converter {
       case 'plantuml':
       default:
         return PlantUmlConverter(
+            generationComment: generationComment,
             theme: theme,
             title: title,
             customHeaders: customHeaders,

@@ -62,7 +62,6 @@ void main(final List<String> arguments) async {
   if (argsResults.wasParsed('help')) {
     // Pass parser for full help
     logger.regular(helper.helpText(argsParser), onlyVerbose: false);
-
     return;
   }
   final from = argsResults['from'] as String?;
@@ -89,7 +88,6 @@ void main(final List<String> arguments) async {
   if (diagramTitle != null) {
     logger.regular('Diagram Title: "$diagramTitle"', onlyVerbose: true);
   }
-
   if (from == null || from.isEmpty) {
     // Enhanced check for 'from'
     logger.error('Argument --from (or -f) is required and cannot be empty.');
@@ -97,8 +95,41 @@ void main(final List<String> arguments) async {
     return;
   }
 
+  // --- Construct the generation comment ---
+  final commandStringBuffer = StringBuffer();
+  commandStringBuffer.writeln('Generated with: code_uml');
+  commandStringBuffer.writeln('Parsed Arguments:');
+  argsParser.options.forEach((final name, final option) {
+    if (argsResults.wasParsed(name)) {
+      final value = argsResults[name];
+      switch (value) {
+        case List():
+          // Don't log empty multi-options if they weren't explicitly provided empty
+          if (value.isNotEmpty) {
+            final listValue = value
+                .map(
+                  (final e) => '"$e"',
+                )
+                .join(',');
+            commandStringBuffer.writeln('  --$name=$listValue \\');
+          }
+        case bool():
+          commandStringBuffer.writeln('  --$name \\');
+        default:
+          commandStringBuffer.writeln('  --$name="$value" \\');
+      }
+    } else if (option.defaultsTo != null &&
+        option.defaultsTo is List &&
+        (option.defaultsTo as List).isNotEmpty) {
+      // Log defaults, but avoid logging empty list defaults for multi-options if not parsed
+      commandStringBuffer.writeln('  --$name="${option.defaultsTo}"');
+    }
+  });
+  final String generationComment = commandStringBuffer.toString().trim();
+
   final converter = Converter(
       converterType: argsResults['uml'] as String,
+      generationComment: generationComment,
       theme: plantUmlTheme,
       title: diagramTitle,
       customHeaders: customHeaders,
@@ -119,7 +150,7 @@ class _Helper {
   const _Helper();
 
   // Modified helpText to include the ArgParser for more dynamic help
-  String helpText(ArgParser parser) {
+  String helpText(final ArgParser parser) {
     return '''
 This package will help you create code for UML, and then use it to build a diagram.
 

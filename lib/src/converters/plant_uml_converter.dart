@@ -1,6 +1,7 @@
 part of 'converter.dart';
 
 final class PlantUmlConverter implements Converter {
+  final String generationComment;
   final String? theme;
   final String? title;
   final List<String> customHeaders;
@@ -8,7 +9,8 @@ final class PlantUmlConverter implements Converter {
   final List<String> excludedMethods;
 
   PlantUmlConverter(
-      {required this.excludedClasses,
+      {required this.generationComment,
+      required this.excludedClasses,
       required this.excludedMethods,
       required this.customHeaders,
       this.theme,
@@ -16,41 +18,16 @@ final class PlantUmlConverter implements Converter {
 
   @override
   String convertToText(final List<ClassDef> defs) {
-    final stringBuffer = StringBuffer('@startuml @\n');
+    final stringBuffer = StringBuffer('@startuml @');
+    stringBuffer.writeln();
 
-    // Apply the theme if provided
-    if (theme != null && theme!.isNotEmpty) {
-      // Ensure theme name doesn't contain unsafe characters
-      if (RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(theme!)) {
-        stringBuffer.writeln('!theme $theme');
-      } else {
-        Logger().error(
-            'Invalid theme name provided: $theme. Skipping theme application.');
-      }
-    }
-
-    for (final headerLine in customHeaders) {
-      // Ensure the line isn't empty and doesn't try to close the diagram prematurely.
-      final trimmedLine = headerLine.trim();
-      if (trimmedLine.isNotEmpty &&
-          !trimmedLine.toLowerCase().startsWith('@enduml')) {
-        stringBuffer.writeln(trimmedLine);
-      }
-    }
-
-    // Apply the title if provided
-    if (title != null && title!.isNotEmpty) {
-      // Escape double quotes
-      final sanitizedTitle = title!
-          .replaceAll('"', '""')
-          // Remove newlines
-          .replaceAll('\n', '');
-      stringBuffer
-          .writeln('title "$sanitizedTitle"'); // Enclose title in quotes
-    }
+    stringBuffer.write(convertComment());
+    stringBuffer.write(convertTheme());
+    stringBuffer.write(convertHeaders());
+    stringBuffer.write(convertTitle());
 
     for (final def in defs) {
-      stringBuffer.write('\n');
+      stringBuffer.writeln();
       stringBuffer.write(def.isAbstract ? 'abstract ' : '');
       stringBuffer
           .write(def.isEnum ? convertStartEnum(def) : convertStartClass(def));
@@ -68,6 +45,63 @@ final class PlantUmlConverter implements Converter {
 
     stringBuffer.write('@enduml');
     return stringBuffer.toString();
+  }
+
+  String convertComment() {
+    final result = StringBuffer();
+
+    generationComment.split('\n').forEach((final line) {
+      result.writeln("' $line");
+    });
+    result.writeln();
+
+    return result.toString();
+  }
+
+  String convertTheme() {
+    final result = StringBuffer();
+
+    if (theme != null && theme!.isNotEmpty) {
+      // Ensure theme name doesn't contain unsafe characters
+      if (RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(theme!)) {
+        result.writeln('!theme $theme');
+      } else {
+        Logger().error(
+            'Invalid theme name provided: $theme. Skipping theme application.');
+      }
+    }
+
+    return result.toString();
+  }
+
+  String convertHeaders() {
+    final result = StringBuffer();
+
+    for (final headerLine in customHeaders) {
+      // Ensure the line isn't empty and doesn't try to close the diagram prematurely.
+      final trimmedLine = headerLine.trim();
+      if (trimmedLine.isNotEmpty &&
+          !trimmedLine.toLowerCase().startsWith('@enduml')) {
+        result.writeln(trimmedLine);
+      }
+    }
+
+    return result.toString();
+  }
+
+  String convertTitle() {
+    final result = StringBuffer();
+
+    if (title != null && title!.isNotEmpty) {
+      // Escape double quotes
+      final sanitizedTitle = title!
+          .replaceAll('"', '""')
+          // Remove newlines
+          .replaceAll('\n', '');
+      result.writeln('title "$sanitizedTitle"'); // Enclose title in quotes
+    }
+
+    return result.toString();
   }
 
   @override

@@ -1,6 +1,7 @@
 part of 'converter.dart';
 
 final class MermaidUmlConverter implements Converter {
+  final String generationComment;
   final String? theme;
   final String? title;
   final List<String> customHeaders;
@@ -8,6 +9,7 @@ final class MermaidUmlConverter implements Converter {
   final List<String> excludedMethods;
 
   MermaidUmlConverter({
+    required this.generationComment,
     required this.excludedClasses,
     required this.excludedMethods,
     required this.customHeaders,
