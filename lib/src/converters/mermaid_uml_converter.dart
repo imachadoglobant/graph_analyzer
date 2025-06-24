@@ -2,6 +2,7 @@ part of 'converter.dart';
 
 final class MermaidUmlConverter implements Converter {
   final String? theme;
+  final String? title;
   final List<String> excludedClasses;
   final List<String> excludedMethods;
 
@@ -9,6 +10,7 @@ final class MermaidUmlConverter implements Converter {
     required this.excludedClasses,
     required this.excludedMethods,
     this.theme,
+    this.title,
   });
 
   @override
@@ -49,7 +51,7 @@ final class MermaidUmlConverter implements Converter {
   }
 
   @override
-  String convertValues(ClassDef def) => '';
+  String convertValues(final ClassDef def) => '';
 
   @override
   String convertFields(final ClassDef def) {

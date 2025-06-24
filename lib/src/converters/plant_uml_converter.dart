@@ -2,14 +2,15 @@ part of 'converter.dart';
 
 final class PlantUmlConverter implements Converter {
   final String? theme;
+  final String? title;
   final List<String> excludedClasses;
   final List<String> excludedMethods;
 
-  PlantUmlConverter({
-    required this.excludedClasses,
-    required this.excludedMethods,
-    this.theme,
-  });
+  PlantUmlConverter(
+      {required this.excludedClasses,
+      required this.excludedMethods,
+      this.theme,
+      this.title});
 
   @override
   String convertToText(final List<ClassDef> defs) {
@@ -26,6 +27,17 @@ final class PlantUmlConverter implements Converter {
         Logger().error(
             'Invalid theme name provided: $theme. Skipping theme application.');
       }
+    }
+
+    // Apply the title if provided
+    if (title != null && title!.isNotEmpty) {
+      // Escape double quotes
+      final sanitizedTitle = title!
+          .replaceAll('"', '""')
+          // Remove newlines
+          .replaceAll('\n', '');
+      stringBuffer
+          .writeln('title "$sanitizedTitle"'); // Enclose title in quotes
     }
 
     for (final def in defs) {

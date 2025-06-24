@@ -38,9 +38,16 @@ void main(final List<String> arguments) async {
     ..addOption(
       // New argument for PlantUML theme
       'theme',
+      abbr: 'T',
       help:
           'Specifies the PlantUML theme to apply (e.g., cloudscape-design, cerulean). Only for PlantUML.',
       valueHelp: 'theme-name',
+    )
+    ..addOption(
+      // New argument for diagram title
+      'title',
+      help: 'Sets the title for the generated diagram.',
+      valueHelp: '"My Awesome Diagram"',
     );
 
   final argsResults = argsParser.parse(arguments);
@@ -65,6 +72,10 @@ void main(final List<String> arguments) async {
   if (plantUmlTheme != null) {
     logger.regular('plantUmlTheme=$plantUmlTheme', onlyVerbose: true);
   }
+  final String? diagramTitle = argsResults['title'] as String?;
+  if (diagramTitle != null) {
+    logger.regular('Diagram Title: "$diagramTitle"', onlyVerbose: true);
+  }
 
   if (from == null || from.isEmpty) {
     // Enhanced check for 'from'
@@ -76,6 +87,7 @@ void main(final List<String> arguments) async {
   final converter = Converter(
       converterType: argsResults['uml'] as String,
       theme: plantUmlTheme,
+      title: diagramTitle,
       excludedClasses: excludedClasses,
       excludedMethods: excludedMethods);
   final reporter = Reporter.file(reportTo, converter);
